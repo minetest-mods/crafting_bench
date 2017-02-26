@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-25 19:50-0700\n"
+"POT-Creation-Date: 2017-02-25 21:16-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,18 +16,38 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: init.lua:8
+#: init.lua:7
+msgid ""
+"The inventory on the left is for raw materials, the inventory on the right "
+"holds finished products. The crafting grid in the center defines what recipe "
+"this workbench will make use of; place raw materials into it in the crafting "
+"pattern corresponding to what you want to build."
+msgstr ""
+
+#: init.lua:10
+msgid ""
+"This workbench is compatible with hoppers. Hoppers will insert into the raw "
+"material inventory and remove items from the finished goods inventory."
+msgstr ""
+
+#: init.lua:14
 msgid "Workbench"
 msgstr ""
 
-#: init.lua:48
+#: init.lua:15
+msgid ""
+"A workbench that does work for you. Set a crafting recipe and provide raw "
+"materials and items will magically craft themselves once every five seconds."
+msgstr ""
+
+#: init.lua:56
 msgid "@1 moves stuff in workbench at @2"
 msgstr ""
 
-#: init.lua:51
+#: init.lua:59
 msgid "@1 moves stuff to workbench at @2"
 msgstr ""
 
-#: init.lua:54
+#: init.lua:62
 msgid "@1 takes stuff from workbench at @2"
 msgstr ""

@@ -4,8 +4,16 @@ local S, NS = dofile(MP.."/intllib.lua")
 
 minetest.register_alias("castle:workbench", "crafting_bench:workbench")
 
+local usage_help = S("The inventory on the left is for raw materials, the inventory on the right holds finished products. The crafting grid in the center defines what recipe this workbench will make use of; place raw materials into it in the crafting pattern corresponding to what you want to build.")
+
+if minetest.get_modpath("hopper") and hopper ~= nil and hopper.add_container ~= nil then
+	usage_help = usage_help .. "\n\n" .. S("This workbench is compatible with hoppers. Hoppers will insert into the raw material inventory and remove items from the finished goods inventory.")
+end
+
 minetest.register_node("crafting_bench:workbench",{
 	description = S("Workbench"),
+	_doc_items_longdesc = S("A workbench that does work for you. Set a crafting recipe and provide raw materials and items will magically craft themselves once every five seconds."),
+	_doc_items_usagehelp = usage_help,
 	tiles = {
 		"crafting_bench_workbench_top.png",
 		"crafting_bench_workbench_bottom.png",
