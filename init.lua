@@ -10,9 +10,14 @@ if minetest.get_modpath("hopper") and hopper ~= nil and hopper.add_container ~= 
 	usage_help = usage_help .. "\n\n" .. S("This workbench is compatible with hoppers. Hoppers will insert into the raw material inventory and remove items from the finished goods inventory.")
 end
 
+
+local crafting_rate = minetest.setting_get("crafting_bench_crafting_rate")
+if crafting_rate == nil then crafting_rate = 5 end
+
+
 minetest.register_node("crafting_bench:workbench",{
 	description = S("Workbench"),
-	_doc_items_longdesc = S("A workbench that does work for you. Set a crafting recipe and provide raw materials and items will magically craft themselves once every five seconds."),
+	_doc_items_longdesc = string.format(S("A workbench that does work for you. Set a crafting recipe and provide raw materials and items will magically craft themselves once every %i seconds."), crafting_rate),
 	_doc_items_usagehelp = usage_help,
 	tiles = {
 		"crafting_bench_workbench_top.png",
@@ -115,7 +120,7 @@ end
 
 minetest.register_abm( {
 	nodenames = { 'crafting_bench:workbench' },
-	interval = 5,
+	interval = crafting_rate,
 	chance = 1,
 	action = function ( pos, node )
 		local meta = minetest.get_meta( pos )
