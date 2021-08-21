@@ -65,10 +65,10 @@ minetest.register_node("crafting_bench:workbench",{
 	end,
 })
 local get_recipe = function ( inv )
-	local result, needed, input
+	local output, needed, decremented_input
 	needed = inv:get_list( 'rec' )
 
-	result, input = minetest.get_craft_result( {
+	output, decremented_input = minetest.get_craft_result( {
 		method = 'normal',
 		width = 3,
 		items = needed
@@ -76,13 +76,13 @@ local get_recipe = function ( inv )
 
 	local totalneed = {}
 
-	if result.item:is_empty() then
-		result = nil
+	if output.item:is_empty() then
+		output = nil
 	else
-		result = result.item
+		output = output.item
 		for _, item in ipairs( needed ) do
 			if item ~= nil and not item:is_empty() and not inv:contains_item( 'src', item ) then
-				result = nil
+				output = nil
 				break
 			end
 			if item ~= nil and not item:is_empty() then
@@ -106,13 +106,13 @@ local get_recipe = function ( inv )
 				end
 			end
 			if number > 0 then
-				result = nil
+				output = nil
 				break
 			end
 		end
 	end
 
-	return needed, input, result
+	return needed, decremented_input, output
 end
 
 minetest.register_abm( {
@@ -122,31 +122,24 @@ minetest.register_abm( {
 	action = function ( pos, node )
 		local meta = minetest.get_meta( pos )
 		local inv = meta:get_inventory()
-		local result, newinput, needed
+		local output, decremented_input, needed
 		if not inv:is_empty( 'src' ) then
 			-- Check for a valid recipe and sufficient resources to craft it
-			needed, newinput, result = get_recipe( inv )
-			if result ~= nil and inv:room_for_item( 'dst', result ) then
-				inv:add_item( 'dst', result )
-				for i, item in pairs( needed ) do
+			needed, decremented_input, output = get_recipe( inv )
+			if output ~= nil and inv:room_for_item( 'dst', output) then
+				inv:add_item( 'dst', output)
+				for _, item in pairs( needed ) do
 					if item ~= nil and item ~= '' then
 						inv:remove_item( 'src', ItemStack( item ) )
 					end
-					if newinput[i] ~= nil and not newinput[i]:is_empty() then
-						inv:add_item( 'src', newinput[i] )
-					end
+				end
+				for i = 1, 9 do
+					inv:add_item( 'dst', decremented_input.items[i] )
 				end
 			end
 		end
 	end
 } )
-
-local function has_locked_chest_privilege(meta, player)
-	if player:get_player_name() ~= meta:get_string("owner") then
-		return false
-	end
-	return true
-end
 
 minetest.register_craft({
 	output = "crafting_bench:workbench",
