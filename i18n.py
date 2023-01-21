@@ -16,25 +16,26 @@ from sys import argv as _argv
 
 # Running params
 params = {"recursive": False,
-    "help": False,
-    "mods": False,
-    "verbose": False,
-    "folders": []
-}
+          "help": False,
+          "mods": False,
+          "verbose": False,
+          "folders": []
+          }
 # Available CLI options
 options = {"recursive": ['--recursive', '-r'],
-    "help": ['--help', '-h'],
-    "mods": ['--installed-mods'],
-    "verbose": ['--verbose', '-v']
-}
+           "help": ['--help', '-h'],
+           "mods": ['--installed-mods'],
+           "verbose": ['--verbose', '-v']
+           }
 
 # Strings longer than this will have extra space added between
 # them in the translation files to make it easier to distinguish their
 # beginnings and endings at a glance
 doublespace_threshold = 60
 
+
 def set_params_folders(tab: list):
-    '''Initialize params["folders"] from CLI arguments.'''
+    """Initialize params["folders"] from CLI arguments."""
     # Discarding argument 0 (tool name)
     for param in tab[1:]:
         stop_param = False
@@ -45,16 +46,18 @@ def set_params_folders(tab: list):
         if not stop_param:
             params["folders"].append(os.path.abspath(param))
 
+
 def set_params(tab: list):
-    '''Initialize params from CLI arguments.'''
+    """Initialize params from CLI arguments."""
     for option in options:
         for option_name in options[option]:
             if option_name in tab:
                 params[option] = True
                 break
 
+
 def print_help(name):
-    '''Prints some help message.'''
+    """Prints some help message."""
     print(f'''SYNOPSIS
     {name} [OPTIONS] [PATHS...]
 DESCRIPTION
@@ -70,7 +73,7 @@ DESCRIPTION
 
 
 def main():
-    '''Main function'''
+    """Main function"""
     set_params(_argv)
     set_params_folders(_argv)
     if params["help"]:
@@ -106,8 +109,9 @@ def main():
             else:
                 update_folder(os.path.abspath("./"))
 
-#group 2 will be the string, groups 1 and 3 will be the delimiters (" or ')
-#See https://stackoverflow.com/questions/46967465/regex-match-text-in-either-single-or-double-quote
+
+# group 2 will be the string, groups 1 and 3 will be the delimiters (" or ')
+# See https://stackoverflow.com/questions/46967465/regex-match-text-in-either-single-or-double-quote
 pattern_lua = re.compile(r'[\.=^\t,{\(\s]N?S\(\s*(["\'])((?:\\\1|(?:(?!\1)).)*)(\1)[\s,\)]', re.DOTALL)
 pattern_lua_bracketed = re.compile(r'[\.=^\t,{\(\s]N?S\(\s*\[\[(.*?)\]\][\s,\)]', re.DOTALL)
 
@@ -119,7 +123,8 @@ pattern_name = re.compile(r'^name[ ]*=[ ]*([^ \n]*)')
 pattern_tr_filename = re.compile(r'\.tr$')
 pattern_po_language_code = re.compile(r'(.*)\.po$')
 
-#attempt to read the mod's name from the mod.conf file. Returns None on failure
+
+# attempt to read the mod's name from the mod.conf file. Returns None on failure
 def get_modname(folder):
     try:
         with open(os.path.join(folder, "mod.conf"), "r", encoding='utf-8') as mod_conf:
@@ -131,7 +136,8 @@ def get_modname(folder):
         pass
     return None
 
-#If there are already .tr files in /locale, returns a list of their names
+
+# If there are already .tr files in /locale, returns a list of their names
 def get_existing_tr_files(folder):
     out = []
     for root, dirs, files in os.walk(os.path.join(folder, 'locale/')):
@@ -139,6 +145,7 @@ def get_existing_tr_files(folder):
             if pattern_tr_filename.search(name):
                 out.append(name)
     return out
+
 
 # A series of search and replaces that massage a .po file's contents into
 # a .tr file's equivalent
@@ -163,6 +170,7 @@ def process_po_file(text):
     # remove double-spaced lines
     text = re.sub(r'\n\n', '\n', text)
     return text
+
 
 # Go through existing .po files and, if a .tr file for that language
 # *doesn't* exist, convert it and create it.
@@ -190,16 +198,19 @@ def process_po_files(folder, modname):
                 with open(tr_file, "wt", encoding='utf-8') as tr_out:
                     tr_out.write(text)
 
+
 # from https://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python/600612#600612
 # Creates a directory if it doesn't exist, silently does
 # nothing if it already exists
 def mkdir_p(path):
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
+    except OSError as exc:  # Python >2.5
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
-        else: raise
+        else:
+            raise
+
 
 # Converts the template dictionary to a text to be written as a file
 # dKeyStrings is a dictionary of localized string to source file sets
@@ -207,7 +218,7 @@ def mkdir_p(path):
 # the previous version of this text
 def strings_to_text(dkeyStrings, dOld, mod_name):
     lOut = [f"# textdomain: {mod_name}\n"]
-    
+
     dGroupedBySource = {}
 
     for key in dkeyStrings:
@@ -217,7 +228,7 @@ def strings_to_text(dkeyStrings, dOld, mod_name):
         listForSource = dGroupedBySource.get(sourceString, [])
         listForSource.append(key)
         dGroupedBySource[sourceString] = listForSource
-    
+
     lSourceKeys = list(dGroupedBySource.keys())
     lSourceKeys.sort()
     for source in lSourceKeys:
@@ -237,7 +248,6 @@ def strings_to_text(dkeyStrings, dOld, mod_name):
             lOut.append(f"{localizedString}={translation}")
             if len(localizedString) > doublespace_threshold:
                 lOut.append("")
-
 
     unusedExist = False
     for key in dOld:
@@ -260,12 +270,13 @@ def strings_to_text(dkeyStrings, dOld, mod_name):
                     lOut.append("")
     return "\n".join(lOut) + '\n'
 
+
 # Writes a template.txt file
 # dkeyStrings is the dictionary returned by generate_template
 def write_template(templ_file, dkeyStrings, mod_name):
     # read existing template file to preserve comments
     existing_template = import_tr_file(templ_file)
-    
+
     text = strings_to_text(dkeyStrings, existing_template[0], mod_name)
     mkdir_p(os.path.dirname(templ_file))
     with open(templ_file, "wt", encoding='utf-8') as template_file:
@@ -277,7 +288,7 @@ def read_lua_file_strings(lua_file):
     lOut = []
     with open(lua_file, encoding='utf-8') as text_file:
         text = text_file.read()
-        #TODO remove comments here
+        # TODO remove comments here
 
         text = re.sub(pattern_concat, "", text)
 
@@ -286,7 +297,7 @@ def read_lua_file_strings(lua_file):
             strings.append(s[1])
         for s in pattern_lua_bracketed.findall(text):
             strings.append(s)
-                
+
         for s in strings:
             s = re.sub(r'"\.\.\s+"', "", s)
             s = re.sub("@[^@=0-9]", "@@", s)
@@ -298,6 +309,7 @@ def read_lua_file_strings(lua_file):
             lOut.append(s)
     return lOut
 
+
 # Gets strings from an existing translation file
 # returns both a dictionary of translations
 # and the full original source text so that the new text
@@ -306,7 +318,7 @@ def import_tr_file(tr_file):
     dOut = {}
     text = None
     if os.path.exists(tr_file):
-        with open(tr_file, "r", encoding='utf-8') as existing_file :
+        with open(tr_file, "r", encoding='utf-8') as existing_file:
             # save the full text to allow for comparison
             # of the old version with the new output
             text = existing_file.read()
@@ -340,6 +352,7 @@ def import_tr_file(tr_file):
                     dOut[match.group(1)] = outval
     return (dOut, text)
 
+
 # Walks all lua files in the mod folder, collects translatable strings,
 # and writes it to a template.txt file
 # Returns a dictionary of localized strings to source file sets
@@ -358,12 +371,13 @@ def generate_template(folder, mod_name):
                     sources = dOut.get(s, set())
                     sources.add(f"### {os.path.basename(fname)} ###")
                     dOut[s] = sources
-                    
+
     if len(dOut) == 0:
         return None
     templ_file = os.path.join(folder, "locale/template.txt")
     write_template(templ_file, dOut, mod_name)
     return dOut
+
 
 # Updates an existing .tr file, copying the old one to a ".old" file
 # if any changes have happened
@@ -386,6 +400,7 @@ def update_tr_file(dNew, mod_name, tr_file):
     with open(tr_file, "w", encoding='utf-8') as new_tr_file:
         new_tr_file.write(textNew)
 
+
 # Updates translation files for the mod in the given folder
 def update_mod(folder):
     modname = get_modname(folder)
@@ -401,10 +416,12 @@ def update_mod(folder):
     else:
         print("Unable to find modname in folder " + folder)
 
+
 # Determines if the folder being pointed to is a mod or a mod pack
 # and then runs update_mod accordingly
 def update_folder(folder):
-    is_modpack = os.path.exists(os.path.join(folder, "modpack.txt")) or os.path.exists(os.path.join(folder, "modpack.conf"))
+    is_modpack = os.path.exists(os.path.join(folder, "modpack.txt")) or os.path.exists(
+        os.path.join(folder, "modpack.conf"))
     if is_modpack:
         subfolders = [f.path for f in os.scandir(folder) if f.is_dir()]
         for subfolder in subfolders:
@@ -412,6 +429,7 @@ def update_folder(folder):
     else:
         update_mod(folder)
     print("Done.")
+
 
 def run_all_subfolders(folder):
     for modfolder in [f.path for f in os.scandir(folder) if f.is_dir()]:
