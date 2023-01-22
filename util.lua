@@ -6,20 +6,47 @@ local function get_single_string(item)
 	return item:to_string()
 end
 
+local craft_result_cache = {}
+
+function util.invalidate_craft_result_cache(pos)
+	craft_result_cache[minetest.pos_to_string(pos)] = nil
+end
+
+function util.get_craft_result(pos)
+	-- cache the craft result on Sokomine's recommendation
+	local spos = minetest.pos_to_string(pos)
+	local result = craft_result_cache[spos]
+
+	local output, decremented_input, needed
+
+	if result then
+		output, decremented_input, needed = unpack(result)
+	else
+		local meta = minetest.get_meta(pos)
+		local inv = meta:get_inventory()
+		needed = inv:get_list("rec")
+
+		output, decremented_input = minetest.get_craft_result({
+			method = "normal",
+			width = 3,
+			items = needed,
+		})
+
+		craft_result_cache[spos] = { output, decremented_input, needed }
+	end
+
+	return output, decremented_input, needed
+end
+
 function util.can_craft(pos)
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	local needed = inv:get_list("rec")
-	local output, decremented_input = minetest.get_craft_result({
-		method = "normal",
-		width = 3,
-		items = needed,
-	})
+	local output, decremented_input, needed = util.get_craft_result(pos)
 
 	if output.item:is_empty() then
 		return false
 	end
 
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
 	local needed_counts = {}
 	for _, item in ipairs(needed) do
 		local itemstring = get_single_string(item)
@@ -56,18 +83,14 @@ function util.can_craft(pos)
 end
 
 function util.do_craft(pos)
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	local needed = inv:get_list("rec")
-	local output, decremented_input = minetest.get_craft_result({
-		method = "normal",
-		width = 3,
-		items = needed,
-	})
+	local output, decremented_input, needed = util.get_craft_result(pos)
 
 	if output.item:is_empty() then
 		crafting_bench.log("error", "@ %s: tried to craft, but no output", minetest.pos_to_string(pos))
 	end
+
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
 
 	for i = 1, #needed do
 		local item = needed[i]

@@ -4,6 +4,8 @@ local crafting_rate = crafting_bench.settings.crafting_rate
 local can_craft = crafting_bench.util.can_craft
 local do_craft = crafting_bench.util.do_craft
 
+local invalidate_craft_result_cache = crafting_bench.util.invalidate_craft_result_cache
+
 local function update_timer(pos)
 	local timer = minetest.get_node_timer(pos)
 	local cc = can_craft(pos)
@@ -92,12 +94,14 @@ minetest.register_node("crafting_bench:workbench", {
 			local stack = inv:get_stack(from_list, from_index)
 			stack:set_count(1)
 			inv:set_stack(to_list, to_index, stack)
+			invalidate_craft_result_cache(pos)
 			update_timer(pos)
 			return 0
 		elseif from_list == "rec" then
 			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			inv:set_stack(from_list, from_index, "")
+			invalidate_craft_result_cache(pos)
 			update_timer(pos)
 			return 0
 		end
@@ -131,6 +135,7 @@ minetest.register_node("crafting_bench:workbench", {
 			local inv = meta:get_inventory()
 			stack:set_count(1)
 			inv:set_stack("rec", index, stack)
+			invalidate_craft_result_cache(pos)
 			update_timer(pos)
 			return 0
 		elseif listname == "dst" then
@@ -160,6 +165,7 @@ minetest.register_node("crafting_bench:workbench", {
 			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			inv:set_stack("rec", index, "")
+			invalidate_craft_result_cache(pos)
 			update_timer(pos)
 			return 0
 		end
