@@ -7,7 +7,7 @@ by: Philipbenr And DanDuncombe
 
 software licence: MIT
 
-see: LICENSE
+see: LICENSE.txt
 
 =-=-=-=-=-=-=-=-=-=
 
@@ -23,3 +23,7 @@ every five seconds it will generate a crafted output.
 This mod is compatible with hoppers.
 
 The crafting rate can be modified in advanced settings.
+
+=-=-=-=-=-=-=-=-=-=
+
+depends on [futil](https://github.com/fluxionary/minetest-futil).
