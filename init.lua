@@ -7,9 +7,6 @@ local f = string.format
 
 crafting_bench = {
 	version = os.time({ year = 2023, month = 01, day = 21 }),
-	author = "Philipbenr and DanDuncombe",
-	license = "MIT",
-	media_license = "CC-BY-SA-3.0",
 
 	modname = modname,
 	modpath = modpath,
