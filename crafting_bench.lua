@@ -1,7 +1,3 @@
-local get_meta = minetest.get_meta
-local get_node_timer = minetest.get_node_timer
-local pos_to_string = minetest.pos_to_string
-
 local S = crafting_bench.S
 local crafting_rate = crafting_bench.settings.crafting_rate
 
@@ -11,7 +7,7 @@ local do_craft = crafting_bench.util.do_craft
 local invalidate_craft_result_cache = crafting_bench.util.invalidate_craft_result_cache
 
 local function update_timer(pos)
-	local timer = get_node_timer(pos)
+	local timer = minetest.get_node_timer(pos)
 	local cc = can_craft(pos)
 	local timer_is_started = timer:is_started()
 	if cc and not timer_is_started then
@@ -47,7 +43,7 @@ minetest.register_node("crafting_bench:workbench", {
 	sounds = crafting_bench.resources.sounds.wood,
 	drawtype = "normal",
 	on_construct = function(pos)
-		local meta = get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		meta:set_string(
 			"formspec",
 			table.concat({
@@ -80,7 +76,7 @@ minetest.register_node("crafting_bench:workbench", {
 		inv:set_size("dst", 1 * 4)
 	end,
 	can_dig = function(pos, player)
-		local meta = get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
 		return inv:is_empty("src") and inv:is_empty("dst")
 	end,
@@ -93,7 +89,7 @@ minetest.register_node("crafting_bench:workbench", {
 		if to_list == "dst" then
 			return 0
 		elseif to_list == "rec" then
-			local meta = get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			local stack = inv:get_stack(from_list, from_index)
 			stack:set_count(1)
@@ -102,7 +98,7 @@ minetest.register_node("crafting_bench:workbench", {
 			update_timer(pos)
 			return 0
 		elseif from_list == "rec" then
-			local meta = get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			inv:set_stack(from_list, from_index, "")
 			invalidate_craft_result_cache(pos)
@@ -113,7 +109,7 @@ minetest.register_node("crafting_bench:workbench", {
 		return count
 	end,
 	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		local meta = get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
 		local stack = inv:get_stack(to_list, to_index)
 		stack:set_count(count)
@@ -123,7 +119,7 @@ minetest.register_node("crafting_bench:workbench", {
 			"%s moves %s in workbench @ %s",
 			player:get_player_name(),
 			stack:to_string(),
-			pos_to_string(pos)
+			minetest.pos_to_string(pos)
 		)
 
 		update_timer(pos)
@@ -135,7 +131,7 @@ minetest.register_node("crafting_bench:workbench", {
 		end
 
 		if listname == "rec" then
-			local meta = get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			stack:set_count(1)
 			inv:set_stack("rec", index, stack)
@@ -154,7 +150,7 @@ minetest.register_node("crafting_bench:workbench", {
 			"%s put %s in workbench @ %s",
 			player:get_player_name(),
 			stack:to_string(),
-			pos_to_string(pos)
+			minetest.pos_to_string(pos)
 		)
 
 		update_timer(pos)
@@ -166,7 +162,7 @@ minetest.register_node("crafting_bench:workbench", {
 		end
 
 		if listname == "rec" then
-			local meta = get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			inv:set_stack("rec", index, "")
 			invalidate_craft_result_cache(pos)
@@ -182,7 +178,7 @@ minetest.register_node("crafting_bench:workbench", {
 			"%s took %s from workbench @ %s",
 			player:get_player_name(),
 			stack:to_string(),
-			pos_to_string(pos)
+			minetest.pos_to_string(pos)
 		)
 
 		update_timer(pos)

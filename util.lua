@@ -1,7 +1,3 @@
-local get_craft_result = minetest.get_craft_result
-local get_meta = minetest.get_meta
-local pos_to_string = minetest.pos_to_string
-
 local FakeInventory = futil.FakeInventory
 
 local util = {}
@@ -15,12 +11,11 @@ end
 local craft_result_cache = {}
 
 function util.invalidate_craft_result_cache(pos)
-	craft_result_cache[pos_to_string(pos)] = nil
+	craft_result_cache[minetest.pos_to_string(pos)] = nil
 end
 
-function util.get_craft_result(pos)
-	-- cache the craft result on Sokomine's recommendation
-	local spos = pos_to_string(pos)
+function util.minetest.get_craft_result(pos)
+	local spos = minetest.pos_to_string(pos)
 	local result = craft_result_cache[spos]
 
 	local output, decremented_input, needed
@@ -28,11 +23,11 @@ function util.get_craft_result(pos)
 	if result then
 		output, decremented_input, needed = unpack(result)
 	else
-		local meta = get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
 		needed = inv:get_list("rec")
 
-		output, decremented_input = get_craft_result({
+		output, decremented_input = minetest.get_craft_result({
 			method = "normal",
 			width = 3,
 			items = needed,
@@ -45,13 +40,13 @@ function util.get_craft_result(pos)
 end
 
 function util.can_craft(pos)
-	local output, decremented_input, needed = util.get_craft_result(pos)
+	local output, decremented_input, needed = util.minetest.get_craft_result(pos)
 
 	if output.item:is_empty() then
 		return false
 	end
 
-	local meta = get_meta(pos)
+	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local needed_counts = {}
 	for _, item in ipairs(needed) do
@@ -89,13 +84,13 @@ function util.can_craft(pos)
 end
 
 function util.do_craft(pos)
-	local output, decremented_input, needed = util.get_craft_result(pos)
+	local output, decremented_input, needed = util.minetest.get_craft_result(pos)
 
 	if output.item:is_empty() then
-		crafting_bench.log("error", "@ %s: tried to craft, but no output", pos_to_string(pos))
+		crafting_bench.log("error", "@ %s: tried to craft, but no output", minetest.pos_to_string(pos))
 	end
 
-	local meta = get_meta(pos)
+	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 
 	for i = 1, #needed do
@@ -105,7 +100,7 @@ function util.do_craft(pos)
 			crafting_bench.log(
 				"error",
 				"@ %s: tried to take %s but only got %s",
-				pos_to_string(pos),
+				minetest.pos_to_string(pos),
 				item:to_string(),
 				taken:to_string()
 			)
@@ -116,7 +111,7 @@ function util.do_craft(pos)
 		crafting_bench.log(
 			"error",
 			"@ %s: no room for %s, adding as an item in the world",
-			pos_to_string(pos),
+			minetest.pos_to_string(pos),
 			remainder:to_string()
 		)
 		minetest.add_item(pos, remainder)
@@ -127,7 +122,7 @@ function util.do_craft(pos)
 			crafting_bench.log(
 				"error",
 				"@ %s: no room for %s, adding as an item in the world",
-				pos_to_string(pos),
+				minetest.pos_to_string(pos),
 				remainder:to_string()
 			)
 			minetest.add_item(pos, remainder)
@@ -139,7 +134,7 @@ function util.do_craft(pos)
 			crafting_bench.log(
 				"error",
 				"@ %s: no room for %s, adding as an item in the world",
-				pos_to_string(pos),
+				minetest.pos_to_string(pos),
 				remainder:to_string()
 			)
 			minetest.add_item(pos, remainder)
