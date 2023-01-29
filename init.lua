@@ -6,8 +6,6 @@ local S = minetest.get_translator(modname)
 local f = string.format
 
 crafting_bench = {
-	version = os.time({ year = 2023, month = 01, day = 21 }),
-
 	modname = modname,
 	modpath = modpath,
 	S = S,
