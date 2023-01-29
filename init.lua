@@ -1,3 +1,4 @@
+-- check whether futil is sufficiently up to date (needs futil.FakeInventory.create_copy)
 futil.check_version({ year = 2023, month = 01, day = 21 })
 
 local modname = minetest.get_current_modname()
