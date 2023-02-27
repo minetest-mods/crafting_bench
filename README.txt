@@ -16,3 +16,7 @@ An auto-crafting bench. Place raw materials into its inventory, define a craftin
 This mod is compatible with hoppers.
 
 The crafting rate can be modified in advanced settings.
+
+=-=-=-=-=-=-=-=-=-=
+
+depends on [futil](https://content.minetest.net/packages/rheo/futil/).
