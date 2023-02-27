@@ -151,6 +151,25 @@ local function update_timer(pos)
 	end
 end
 
+local formspec =
+	'size[10,10;]' ..
+	default.gui_bg ..
+	default.gui_bg_img ..
+	default.gui_slots ..
+	'label[1,0;'..S('Source Material')..']' ..
+	'list[context;src;1,1;2,4;]' ..
+	'label[4,0;'..S('Recipe to Use')..']' ..
+	'list[context;rec;4,1;3,3;]' ..
+	'label[7.5,0;'..S('Craft Output')..']' ..
+	'list[context;dst;8,1;1,4;]' ..
+	'list[current_player;main;1,6;8,4;]' ..
+	'listring[context;dst]'..
+	'listring[current_player;main]'..
+	'listring[context;src]'..
+	'listring[current_player;main]' ..
+	'listring[context;rec]'..
+	'listring[current_player;main]'
+
 minetest.register_node("crafting_bench:workbench",{
 	description = S("Workbench"),
 	_doc_items_longdesc = S(
@@ -173,22 +192,7 @@ minetest.register_node("crafting_bench:workbench",{
 	drawtype = "normal",
 	on_construct = function ( pos )
 		local meta = minetest.get_meta( pos )
-		meta:set_string( 'formspec',
-		'size[10,10;]' ..
-		default.gui_bg ..
-		default.gui_bg_img ..
-		default.gui_slots ..
-		'label[1,0;'..S('Source Material')..']' ..
-		'list[context;src;1,1;2,4;]' ..
-		'label[4,0;'..S('Recipe to Use')..']' ..
-		'list[context;rec;4,1;3,3;]' ..
-		'label[7.5,0;'..S('Craft Output')..']' ..
-		'list[context;dst;8,1;1,4;]' ..
-		'list[current_player;main;1,6;8,4;]' ..
-		'listring[current_name;dst]'..
-		'listring[current_player;main]'..
-		'listring[current_name;src]'..
-		'listring[current_player;main]')
+		meta:set_string( 'formspec', formspec)
 		meta:set_string( 'infotext', S('Workbench'))
 		local inv = meta:get_inventory()
 		inv:set_size( 'src', 2 * 4 )
@@ -348,6 +352,7 @@ minetest.register_lbm({
 				end
 			end
 
+			meta:set_string( 'formspec', formspec)
 			update_timer(pos)
 		end
 
