@@ -56,8 +56,9 @@ minetest.register_node("crafting_bench:workbench",{
 	can_dig = function(pos,player)
 		local meta = minetest.get_meta(pos);
 		local inv = meta:get_inventory()
-		return inv:is_empty("main")
+		return inv:is_empty("src") and inv:is_empty("rec") and inv:is_empty("dst")
 	end,
+	on_blast = function(pos) end,
 	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
 		minetest.log("action", player:get_player_name().." moves stuff in workbench at "..minetest.pos_to_string(pos))
 	end,
