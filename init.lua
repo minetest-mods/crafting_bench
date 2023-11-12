@@ -53,8 +53,8 @@ if has_default then
 	groups = {choppy=2, oddly_breakable_by_hand=2, flammable=2}
 	sounds = default.node_sound_wood_defaults()
 elseif has_mcl then
-	formspec ="formspec_version[4]"..
-		"size[11.75,10.425]"..
+	formspec ='formspec_version[4]'..
+		'size[11.75,10.425]'..
 
 		mcl_formspec.get_itemslot_bg_v4(1, 0.75, 2, 3)..
 		mcl_formspec.get_itemslot_bg_v4(5, 0.75, 3, 3)..
@@ -66,11 +66,11 @@ elseif has_mcl then
 		'label[9.5,0.375;'..S('Craft Output')..']' ..
 		'list[context;dst;10,0.75;1,4;]' ..
 
-		"label[0.375,4.7;" .. F(C(mcl_formspec.label_color, S("Inventory"))) .. "]"..
+		'label[0.375,4.7;' .. F(C(mcl_formspec.label_color, S('Inventory'))) .. ']'..
 		mcl_formspec.get_itemslot_bg_v4(0.375, 5.1, 9, 3)..
-		"list[current_player;main;0.375,5.1;9,3;9]"..
+		'list[current_player;main;0.375,5.1;9,3;9]'..
 		mcl_formspec.get_itemslot_bg_v4(0.375, 9.05, 9, 1)..
-		"list[current_player;main;0.375,9.05;9,1;]"..
+		'list[current_player;main;0.375,9.05;9,1;]'..
 
 		'listring[current_name;dst]'..
 		'listring[current_player;main]'..
