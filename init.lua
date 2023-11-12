@@ -72,8 +72,10 @@ elseif has_mcl then
 		mcl_formspec.get_itemslot_bg_v4(0.375, 9.05, 9, 1)..
 		"list[current_player;main;0.375,9.05;9,1;]"..
 
-		"listring[current_player;src]"..
-		"listring[current_player;main]"
+		'listring[current_name;dst]'..
+		'listring[current_player;main]'..
+		'listring[current_name;src]'..
+		'listring[current_player;main]'
 	groups = {axey=2, handy=2, flammable=-1, container = 4}
 	sounds = mcl_sounds.node_sound_wood_defaults()
 	mcl_hardness = 2
