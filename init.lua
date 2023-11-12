@@ -31,6 +31,7 @@ end
 local groups
 local mcl_hardness
 local mcl_blast_res
+local sounds
 
 local formspec
 if has_default then
@@ -50,6 +51,7 @@ if has_default then
 		'listring[current_name;src]'..
 		'listring[current_player;main]'
 	groups = {choppy=2, oddly_breakable_by_hand=2, flammable=2}
+	sounds = default.node_sound_wood_defaults()
 elseif has_mcl then
 	formspec ="formspec_version[4]"..
 		"size[11.75,10.425]"..
@@ -73,6 +75,7 @@ elseif has_mcl then
 		"listring[current_player;src]"..
 		"listring[current_player;main]"
 	groups = {axey=2, handy=2, flammable=-1, container = 4}
+	sounds = mcl_sounds.node_sound_wood_defaults()
 	mcl_hardness = 2
 	mcl_blast_res = 3
 end
@@ -92,7 +95,7 @@ minetest.register_node("crafting_bench:workbench",{
 	paramtype2 = "facedir",
 	paramtype = "light",
 	groups = groups,
-	sounds = ( has_default and default.node_sound_wood_defaults()) or (has_mcl and mcl_sounds.node_sound_wood_defaults()),
+	sounds = sounds,
 	drawtype = "normal",
 	_mcl_hardness = mcl_hardness,
 	_mcl_blast_resistance = mcl_blast_res,
