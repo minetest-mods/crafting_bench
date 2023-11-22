@@ -1,16 +1,86 @@
 local S = minetest.get_translator("crafting_bench")
+local F = minetest.formspec_escape
+local C = minetest.colorize
 
 minetest.register_alias("castle:workbench", "crafting_bench:workbench")
 
+local has_mcl = minetest.get_modpath("mcl_formspec")
+local has_default = minetest.get_modpath("default")
+
 local usage_help = S("The inventory on the left is for raw materials, the inventory on the right holds finished products. The crafting grid in the center defines what recipe this workbench will make use of; place raw materials into it in the crafting pattern corresponding to what you want to build.")
 
-if minetest.get_modpath("hopper") and hopper ~= nil and hopper.add_container ~= nil then
+if ( minetest.get_modpath("hopper") and hopper ~= nil and hopper.add_container ~= nil ) or has_mcl then
 	usage_help = usage_help .. "\n\n" .. S("This workbench is compatible with hoppers. Hoppers will insert into the raw material inventory and remove items from the finished goods inventory.")
 end
 
 
 local crafting_rate = tonumber(minetest.settings:get("crafting_bench_crafting_rate")) or 5
 
+if not has_default and not has_mcl then
+	error("The crafting bench mod needs either the default mod (minetest game) or mineclonia/mineclone2 to work")
+end
+
+local invsize_src = 2 * 4
+local invsize_dst = 1 * 4
+
+if has_mcl then
+	invsize_src = 2 * 3
+	invsize_dst = 1 * 3
+end
+
+local groups
+local mcl_hardness
+local mcl_blast_res
+local sounds
+
+local formspec
+if has_default then
+	formspec = 'size[10,10;]' ..
+		default.gui_bg ..
+		default.gui_bg_img ..
+		default.gui_slots ..
+		'label[1,0;'..S('Source Material')..']' ..
+		'list[context;src;1,1;2,4;]' ..
+		'label[4,0;'..S('Recipe to Use')..']' ..
+		'list[context;rec;4,1;3,3;]' ..
+		'label[7.5,0;'..S('Craft Output')..']' ..
+		'list[context;dst;8,1;1,4;]' ..
+		'list[current_player;main;1,6;8,4;]' ..
+		'listring[current_name;dst]'..
+		'listring[current_player;main]'..
+		'listring[current_name;src]'..
+		'listring[current_player;main]'
+	groups = {choppy=2, oddly_breakable_by_hand=2, flammable=2}
+	sounds = default.node_sound_wood_defaults()
+elseif has_mcl then
+	formspec ='formspec_version[4]'..
+		'size[11.75,10.425]'..
+
+		mcl_formspec.get_itemslot_bg_v4(1, 0.75, 2, 3)..
+		mcl_formspec.get_itemslot_bg_v4(5, 0.75, 3, 3)..
+		mcl_formspec.get_itemslot_bg_v4(10, 0.75, 1, 3)..
+		'label[1,0.375;'..S('Source Material')..']' ..
+		'list[context;src;1,0.75;2,4;]' ..
+		'label[5,0.375;'..S('Recipe to Use')..']' ..
+		'list[context;rec;5,0.75;3,3;]' ..
+		'label[9.5,0.375;'..S('Craft Output')..']' ..
+		'list[context;dst;10,0.75;1,4;]' ..
+
+		'label[0.375,4.7;' .. F(C(mcl_formspec.label_color, S('Inventory'))) .. ']'..
+		mcl_formspec.get_itemslot_bg_v4(0.375, 5.1, 9, 3)..
+		'list[current_player;main;0.375,5.1;9,3;9]'..
+		mcl_formspec.get_itemslot_bg_v4(0.375, 9.05, 9, 1)..
+		'list[current_player;main;0.375,9.05;9,1;]'..
+
+		'listring[current_name;dst]'..
+		'listring[current_player;main]'..
+		'listring[current_name;src]'..
+		'listring[current_player;main]'
+	groups = {axey=2, handy=2, flammable=-1, container = 4}
+	sounds = mcl_sounds.node_sound_wood_defaults()
+	mcl_hardness = 2
+	mcl_blast_res = 3
+end
 
 minetest.register_node("crafting_bench:workbench",{
 	description = S("Workbench"),
@@ -26,32 +96,19 @@ minetest.register_node("crafting_bench:workbench",{
 		},
 	paramtype2 = "facedir",
 	paramtype = "light",
-	groups = {choppy=2,oddly_breakable_by_hand=2,flammable=2},
-	sounds = default.node_sound_wood_defaults(),
+	groups = groups,
+	sounds = sounds,
 	drawtype = "normal",
+	_mcl_hardness = mcl_hardness,
+	_mcl_blast_resistance = mcl_blast_res,
 	on_construct = function ( pos )
 		local meta = minetest.get_meta( pos )
-			meta:set_string( 'formspec',
-			'size[10,10;]' ..
-			default.gui_bg ..
-			default.gui_bg_img ..
-			default.gui_slots ..
-			'label[1,0;'..S('Source Material')..']' ..
-			'list[context;src;1,1;2,4;]' ..
-			'label[4,0;'..S('Recipe to Use')..']' ..
-			'list[context;rec;4,1;3,3;]' ..
-			'label[7.5,0;'..S('Craft Output')..']' ..
-			'list[context;dst;8,1;1,4;]' ..
-			'list[current_player;main;1,6;8,4;]' ..
-			'listring[current_name;dst]'..
-			'listring[current_player;main]'..
-			'listring[current_name;src]'..
-			'listring[current_player;main]')
+		meta:set_string( 'formspec', formspec)
 		meta:set_string( 'infotext', S('Workbench'))
 		local inv = meta:get_inventory()
-		inv:set_size( 'src', 2 * 4 )
+		inv:set_size( 'src', invsize_src )
 		inv:set_size( 'rec', 3 * 3 )
-		inv:set_size( 'dst', 1 * 4 )
+		inv:set_size( 'dst', invsize_dst )
 	end,
 	can_dig = function(pos,player)
 		local meta = minetest.get_meta(pos);
