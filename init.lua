@@ -28,13 +28,8 @@ if has_mcl then
 	invsize_dst = 1 * 3
 end
 
-local groups
-local mcl_hardness
-local mcl_blast_res
-local sounds
-local steel_ingot
-local wood
-local tree
+local groups, mcl_hardness, mcl_blast_res, sounds
+local steel_ingot, wood, tree
 
 local formspec
 if has_default then
