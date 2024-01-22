@@ -28,10 +28,8 @@ if has_mcl then
 	invsize_dst = 1 * 3
 end
 
-local groups
-local mcl_hardness
-local mcl_blast_res
-local sounds
+local groups, mcl_hardness, mcl_blast_res, sounds
+local steel_ingot, wood, tree
 
 local formspec
 if has_default then
@@ -76,9 +74,9 @@ elseif has_mcl then
 		'listring[current_player;main]'..
 		'listring[current_name;src]'..
 		'listring[current_player;main]'
-	groups = {axey=2, handy=2, flammable=-1, container = 4}
+	groups = {axey=2, handy=1, flammable=-1, container = 4}
 	sounds = mcl_sounds.node_sound_wood_defaults()
-	mcl_hardness = 2
+	mcl_hardness = 3
 	mcl_blast_res = 3
 end
 
@@ -203,12 +201,23 @@ minetest.register_abm( {
 	end
 } )
 
+-- Crafting recipe compatibility.
+if has_default then
+	steel_ingot = "default:steel_ingot"
+	wood = "default:wood"
+	tree = "default:tree"
+elseif has_mcl then
+	steel_ingot = "mcl_core:iron_ingot"
+	wood = "mcl_core:wood"
+	tree = "mcl_core:tree"
+end
+
 minetest.register_craft({
 	output = "crafting_bench:workbench",
 	recipe = {
-		{"default:steel_ingot","default:steel_ingot","default:steel_ingot"},
-		{"default:wood", "default:wood","default:steel_ingot"},
-		{"default:tree", "default:tree","default:steel_ingot"},
+		{steel_ingot, steel_ingot, steel_ingot},
+		{wood, wood, steel_ingot},
+		{tree, tree, steel_ingot},
 	}
 })
 
