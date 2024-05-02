@@ -126,6 +126,7 @@ minetest.register_node("crafting_bench:workbench",{
 		end
 
 		if to_list == "dst" then
+			-- Only allow to take from the output
 			return 0
 		elseif to_list == "rec" then
 			local meta = minetest.get_meta(pos)
@@ -133,8 +134,14 @@ minetest.register_node("crafting_bench:workbench",{
 			local stack = inv:get_stack(from_list, from_index)
 			stack:set_count(1)
 			inv:set_stack(to_list, to_index, stack)
+
+			if from_list == "rec" then
+				-- For convenience: emulate movement instead of duplication
+				inv:set_stack(from_list, from_index, "")
+			end
 			return 0
 		elseif from_list == "rec" then
+			-- Remove recipe stack
 			local meta = minetest.get_meta(pos)
 			local inv = meta:get_inventory()
 			inv:set_stack(from_list, from_index, "")
