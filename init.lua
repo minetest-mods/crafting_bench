@@ -252,7 +252,8 @@ minetest.register_abm( {
 	end
 } )
 
--- Make sure that all stacks in the 'recipe' inv count 1 item. Bigger stacks result in item duplication, see issue#14
+-- Make sure that all stacks in the 'recipe' inv count 1 item.
+-- Bigger stacks result in item duplication, see issue#14
 minetest.register_lbm({
 	name = "crafting_bench:cleanup_rec_inv",
 	label = "remove multiple-item-stacks from recipe inv",
@@ -262,12 +263,12 @@ minetest.register_lbm({
 		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
 		for i, item in ipairs(inv:get_list("rec")) do
-			if not item:is_empty() then
-				inv:set_stack("rec", i, item:peek_item())
-				local leftover = inv:add_item("dst", item:to_string())
-				if not leftover:is_empty() then
-					minetest.log("action", "[crafting_bench] deleting leftover " .. item:to_string() .. " from recipe inv at " .. minetest.pos_to_string(pos))
-				end
+			-- Limit to stack size 1 (or keep empty)
+			inv:set_stack("rec", i, item:peek_item())
+			local leftover = inv:add_item("dst", item)
+			if not leftover:is_empty() then
+				minetest.log("action", "[crafting_bench] deleting leftover " ..
+					item:to_string() .. " from recipe inv at " .. minetest.pos_to_string(pos))
 			end
 		end
 	end
