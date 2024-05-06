@@ -114,14 +114,72 @@ minetest.register_node("crafting_bench:workbench",{
 		return inv:is_empty("src") and inv:is_empty("rec") and inv:is_empty("dst")
 	end,
 	on_blast = function(pos) end,
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name().." moves stuff in workbench at "..minetest.pos_to_string(pos))
-	end,
 	on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name().." moves stuff to workbench at "..minetest.pos_to_string(pos))
+		minetest.log("action", player:get_player_name().." put "..stack:to_string().." in workbench at "..minetest.pos_to_string(pos))
 	end,
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name().." takes stuff from workbench at "..minetest.pos_to_string(pos))
+		minetest.log("action", player:get_player_name().." takes "..stack:to_string().." from workbench at "..minetest.pos_to_string(pos))
+	end,
+	allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+		if not minetest.is_player(player) or minetest.is_protected(pos, player:get_player_name()) then
+			return 0
+		end
+
+		if to_list == "dst" then
+			-- Only allow to take from the output
+			return 0
+		elseif to_list == "rec" then
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			local stack = inv:get_stack(from_list, from_index)
+			stack:set_count(1)
+			inv:set_stack(to_list, to_index, stack)
+
+			if from_list == "rec" then
+				-- For convenience: emulate movement instead of duplication
+				inv:set_stack(from_list, from_index, "")
+			end
+			return 0
+		elseif from_list == "rec" then
+			-- Remove recipe stack
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			inv:set_stack(from_list, from_index, "")
+			return 0
+		end
+
+		return count
+	end,
+	allow_metadata_inventory_put = function(pos, listname, index, stack, player)
+		if not minetest.is_player(player) or minetest.is_protected(pos, player:get_player_name()) then
+			return 0
+		end
+
+		if listname == "rec" then
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			stack:set_count(1)
+			inv:set_stack("rec", index, stack)
+			return 0
+		elseif listname == "dst" then
+			return 0
+		end
+
+		return stack:get_count()
+	end,
+	allow_metadata_inventory_take = function(pos, listname, index, stack, player)
+		if not minetest.is_player(player) or minetest.is_protected(pos, player:get_player_name()) then
+			return 0
+		end
+
+		if listname == "rec" then
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			inv:set_stack("rec", index, "")
+			return 0
+		end
+
+		return stack:get_count()
 	end,
 })
 local get_recipe = function ( inv )
@@ -200,6 +258,28 @@ minetest.register_abm( {
 		end
 	end
 } )
+
+-- Make sure that all stacks in the 'recipe' inv count 1 item.
+-- Bigger stacks result in item duplication, see issue#14
+minetest.register_lbm({
+	name = "crafting_bench:cleanup_rec_inv",
+	label = "remove multiple-item-stacks from recipe inv",
+	nodenames = {"crafting_bench:workbench"},
+	run_at_every_load = false,
+	action = function(pos, node)
+		local meta = minetest.get_meta(pos)
+		local inv = meta:get_inventory()
+		for i, item in ipairs(inv:get_list("rec")) do
+			-- Limit to stack size 1 (or keep empty)
+			inv:set_stack("rec", i, item:peek_item())
+			local leftover = inv:add_item("dst", item)
+			if not leftover:is_empty() then
+				minetest.log("action", "[crafting_bench] deleting leftover " ..
+					item:to_string() .. " from recipe inv at " .. minetest.pos_to_string(pos))
+			end
+		end
+	end
+})
 
 -- Crafting recipe compatibility.
 if has_default then
