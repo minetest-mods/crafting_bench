@@ -269,7 +269,8 @@ minetest.register_lbm({
 	action = function(pos, node)
 		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
-		for i, item in ipairs(inv:get_list("rec")) do
+		-- `get_list` may return `nil` when the node was placed without calling `on_construct`
+		for i, item in ipairs(inv:get_list("rec") or {}) do
 			-- Limit to stack size 1 (or keep empty)
 			inv:set_stack("rec", i, item:peek_item())
 			local leftover = inv:add_item("dst", item)
